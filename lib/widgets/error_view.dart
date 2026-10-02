@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
-/// Estado de error reutilizable — Sesión 3. Incluye un botón de reintentar
-/// (`onReintentar`) para que el usuario no quede atrapado sin salida.
 class ErrorView extends StatelessWidget {
   final String mensaje;
   final VoidCallback onReintentar;

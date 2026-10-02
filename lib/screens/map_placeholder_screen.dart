@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Placeholder de la pestaña Mapa — Sesión 2. Se reemplaza por un mapa
-/// real (flutter_map + OpenStreetMap) en la Sesión 5.
 class MapPlaceholderScreen extends StatelessWidget {
   const MapPlaceholderScreen({super.key});
 

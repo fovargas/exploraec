@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/place.dart';
 
-/// Pantalla de Detalle: recibe un [Place] completo por su constructor,
-/// sin volver a consultar ninguna lista — Sesión 2.
 class DetailScreen extends StatelessWidget {
   final Place place;
   const DetailScreen({super.key, required this.place});
