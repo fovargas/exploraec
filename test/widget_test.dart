@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 
+import 'package:exploraec/controllers/places_controller.dart';
 import 'package:exploraec/main.dart';
 import 'package:exploraec/models/place.dart';
 
@@ -67,6 +70,40 @@ void main() {
     expect(find.text('ExploraEC (7)'), findsOneWidget);
     expect(find.text('Lugar agregado'), findsOneWidget);
     await tester.pumpAndSettle(const Duration(seconds: 4));
+  });
+
+  testWidgets('Sin servicio de ubicación el Mapa muestra el error con Reintentar', (tester) async {
+    const canal = MethodChannel('flutter.baseflow.com/geolocator');
+    final mensajero = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    mensajero.setMockMethodCallHandler(canal, (llamada) async => false);
+    addTearDown(() => mensajero.setMockMethodCallHandler(canal, null));
+
+    await abrirApp(tester);
+
+    await tester.tap(find.byIcon(Icons.map));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('La ubicación está desactivada'), findsOneWidget);
+    expect(find.text('Reintentar'), findsOneWidget);
+  });
+
+  testWidgets('Con la posición conocida las tarjetas muestran la distancia', (tester) async {
+    await abrirApp(tester);
+    expect(find.textContaining('de ti'), findsNothing);
+
+    Get.find<PlacesController>().posicion.value = Position(
+      latitude: -0.1938,
+      longitude: -78.4869,
+      timestamp: DateTime(2026),
+      accuracy: 0,
+      altitude: 0,
+      altitudeAccuracy: 0,
+      heading: 0,
+      headingAccuracy: 0,
+      speed: 0,
+      speedAccuracy: 0,
+    );
+    await tester.pump();
+    expect(find.text('A 0 m de ti'), findsOneWidget);
   });
 
   testWidgets('Los favoritos se comparten con la pestaña Favoritos', (tester) async {
