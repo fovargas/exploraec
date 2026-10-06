@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 
 import 'package:exploraec/controllers/places_controller.dart';
 import 'package:exploraec/main.dart';
+import 'package:exploraec/models/gasto.dart';
 import 'package:exploraec/models/place.dart';
 
 void main() {
@@ -128,6 +129,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Favorites'), findsOneWidget);
+    expect(find.text('Expenses'), findsOneWidget);
+  });
+
+  testWidgets('La pestaña Gastos muestra el formulario y la dirección del backend', (tester) async {
+    await abrirApp(tester);
+
+    await tester.tap(find.byIcon(Icons.receipt_long));
+    await tester.pumpAndSettle();
+    expect(find.text('Entrar'), findsOneWidget);
+    expect(find.text('Servidor: http://10.0.2.2:8000'), findsOneWidget);
+  });
+
+  test('Gasto.fromJson acepta montos enteros y campos faltantes', () {
+    final gasto = Gasto.fromJson({'id': 1, 'descripcion': 'Taxi', 'monto': 4, 'categoria': 'transporte'});
+    expect(gasto.monto, 4.0);
+    expect(gasto.fecha, '');
+
+    final vacio = Gasto.fromJson({});
+    expect(vacio.descripcion, 'Sin descripción');
+    expect(vacio.categoria, 'otros');
   });
 
   testWidgets('La tarjeta expone un label accesible y abre el detalle', (tester) async {
