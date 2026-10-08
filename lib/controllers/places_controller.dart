@@ -1,5 +1,6 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 
 import '../models/place.dart';
 import '../services/location_service.dart';
@@ -31,6 +32,9 @@ class PlacesController extends GetxController {
   void onInit() {
     _observarErrores();
     super.onInit();
+    favoritos.value = _favoritosBox.values
+        .map((mapa) => Place.fromMap(Map<String, dynamic>.from(mapa)))
+        .toList();
     cargarLugares();
   }
 
@@ -80,15 +84,19 @@ class PlacesController extends GetxController {
   }
 
   final RxList<Place> favoritos = <Place>[].obs;
+  final Box<Map> _favoritosBox = Hive.box<Map>('favoritos');
 
   bool esFavorito(Place lugar) => favoritos.any((p) => p.id == lugar.id);
 
   int get totalFavoritos => favoritos.length;
 
+  // Hive guarda; el RxList notifica a la UI.
   void alternarFavorito(Place lugar) {
     if (esFavorito(lugar)) {
+      _favoritosBox.delete(lugar.id);
       favoritos.removeWhere((p) => p.id == lugar.id);
     } else {
+      _favoritosBox.put(lugar.id, lugar.toMap());
       favoritos.add(lugar);
     }
   }

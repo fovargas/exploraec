@@ -9,6 +9,7 @@ import '../widgets/error_view.dart';
 import '../widgets/loading_view.dart';
 import '../widgets/place_card.dart';
 import 'add_place_screen.dart';
+import '../services/settings_service.dart';
 
 class HomeScreen extends GetView<PlacesController> {
   const HomeScreen({super.key});
@@ -22,10 +23,7 @@ class HomeScreen extends GetView<PlacesController> {
           IconButton(
             icon: const Icon(Icons.translate),
             tooltip: 'idioma'.tr,
-            onPressed: () {
-              final esEspanol = Get.locale?.languageCode == 'es';
-              Get.updateLocale(esEspanol ? const Locale('en', 'US') : const Locale('es', 'EC'));
-            },
+            onPressed: SettingsService.alternarIdioma,
           ),
           PopupMenuButton<String>(
             tooltip: 'Simular estado (solo práctica)',

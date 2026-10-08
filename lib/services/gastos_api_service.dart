@@ -40,6 +40,17 @@ class GastosApiService {
     _token = token;
   }
 
+  // El id da nombre a la caja de Hive de cada usuario (`gastos_<id>`).
+  Future<int> obtenerIdUsuario() async {
+    final respuesta = await _get('/usuarios/me');
+    final json = jsonDecode(utf8.decode(respuesta.bodyBytes));
+    final id = json is Map ? json['id'] : null;
+    if (id is! int) {
+      throw ApiException('Respuesta inesperada del servidor al leer tu perfil.');
+    }
+    return id;
+  }
+
   Future<({List<Gasto> gastos, int total})> listarGastos({
     int skip = 0,
     int limit = 20,

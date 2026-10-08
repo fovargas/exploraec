@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 
 import 'package:exploraec/controllers/places_controller.dart';
 import 'package:exploraec/main.dart';
@@ -12,7 +13,15 @@ import 'package:exploraec/models/place.dart';
 void main() {
   final lugaresIniciales = List.of(lugaresEjemplo);
 
-  tearDown(() {
+  setUpAll(() async {
+    // Cajas en memoria: el reloj simulado de testWidgets no espera I/O real.
+    await Hive.openBox<Map>('favoritos', bytes: Uint8List(0));
+    await Hive.openBox('ajustes', bytes: Uint8List(0));
+  });
+
+  tearDown(() async {
+    await Hive.box<Map>('favoritos').clear();
+    await Hive.box('ajustes').clear();
     Get.reset();
     lugaresEjemplo
       ..clear()
@@ -114,9 +123,30 @@ void main() {
     await tester.pump();
     expect(find.byTooltip('Quitar de favoritos'), findsOneWidget);
 
+    expect(Hive.box<Map>('favoritos').containsKey('1'), isTrue);
+
     await tester.tap(find.byIcon(Icons.favorite).last);
     await tester.pumpAndSettle();
-    expect(find.textContaining('Favoritos marcados: 1'), findsOneWidget);
+    expect(find.text('Favoritos'), findsWidgets);
+    expect(find.text('Parque El Ejido'), findsOneWidget);
+  });
+
+  testWidgets('Los favoritos guardados en Hive se cargan al arrancar', (tester) async {
+    final lugar = lugaresEjemplo[2];
+    await Hive.box<Map>('favoritos').put(lugar.id, lugar.toMap());
+
+    await abrirApp(tester);
+    await tester.tap(find.byIcon(Icons.favorite).last);
+    await tester.pumpAndSettle();
+    expect(find.text('Museo Casa del Alabado'), findsOneWidget);
+    expect(find.text('Parque El Ejido'), findsNothing);
+  });
+
+  testWidgets('La app arranca en el idioma guardado', (tester) async {
+    await Hive.box('ajustes').put('idioma', 'en');
+
+    await abrirApp(tester);
+    expect(find.text('Home'), findsOneWidget);
   });
 
   testWidgets('La barra inferior se traduce al inglés', (tester) async {
@@ -149,6 +179,15 @@ void main() {
     final vacio = Gasto.fromJson({});
     expect(vacio.descripcion, 'Sin descripción');
     expect(vacio.categoria, 'otros');
+  });
+
+  test('Gasto y Place se reconstruyen desde toMap()', () {
+    final gasto = Gasto.fromJson({'id': 3, 'descripcion': 'Bus', 'monto': 0.35, 'categoria': 'transporte', 'fecha': '2026-10-05'});
+    final copia = Gasto.fromMap(Map<dynamic, dynamic>.from(gasto.toMap()));
+    expect(copia.toMap(), gasto.toMap());
+
+    final lugar = lugaresEjemplo.first;
+    expect(Place.fromMap(lugar.toMap()).toMap(), lugar.toMap());
   });
 
   testWidgets('La tarjeta expone un label accesible y abre el detalle', (tester) async {

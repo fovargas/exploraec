@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'bindings/places_binding.dart';
 import 'i18n/app_translations.dart';
+import 'screens/favorites_screen.dart';
+import 'screens/gastos_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/map_screen.dart';
-import 'screens/favorites_placeholder_screen.dart';
-import 'screens/gastos_screen.dart';
+import 'services/settings_service.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  // La caja de gastos se abre al iniciar sesión: depende del usuario.
+  await Hive.openBox<Map>('favoritos');
+  await SettingsService.abrir();
   runApp(const ExploraEcApp());
 }
 
@@ -24,7 +31,7 @@ class ExploraEcApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       translations: AppTranslations(),
-      locale: const Locale('es', 'EC'),
+      locale: SettingsService.idioma,
       fallbackLocale: const Locale('es', 'EC'),
       initialBinding: PlacesBinding(),
       home: const RootShell(),
@@ -48,7 +55,7 @@ class _RootShellState extends State<RootShell> {
       body: switch (_indiceActual) {
         0 => const HomeScreen(),
         1 => const MapScreen(),
-        2 => const FavoritesPlaceholderScreen(),
+        2 => const FavoritesScreen(),
         _ => const GastosScreen(),
       },
       bottomNavigationBar: BottomNavigationBar(

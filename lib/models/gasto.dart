@@ -23,4 +23,15 @@ class Gasto {
       fecha: (json['fecha'] as String?) ?? '',
     );
   }
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'descripcion': descripcion,
+        'monto': monto,
+        'categoria': categoria,
+        'fecha': fecha,
+      };
+
+  // Hive devuelve `Map<dynamic, dynamic>`.
+  factory Gasto.fromMap(Map mapa) => Gasto.fromJson(Map<String, dynamic>.from(mapa));
 }

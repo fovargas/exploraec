@@ -14,6 +14,24 @@ class Place {
     required this.lat,
     required this.lng,
   });
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'nombre': nombre,
+        'categoria': categoria,
+        'descripcion': descripcion,
+        'lat': lat,
+        'lng': lng,
+      };
+
+  factory Place.fromMap(Map<String, dynamic> mapa) => Place(
+        id: mapa['id'] as String,
+        nombre: mapa['nombre'] as String,
+        categoria: mapa['categoria'] as String,
+        descripcion: mapa['descripcion'] as String,
+        lat: (mapa['lat'] as num).toDouble(),
+        lng: (mapa['lng'] as num).toDouble(),
+      );
 }
 
 final List<Place> lugaresEjemplo = [
