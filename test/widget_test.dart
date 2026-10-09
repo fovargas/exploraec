@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 
+import 'package:exploraec/controllers/auth_controller.dart';
 import 'package:exploraec/controllers/places_controller.dart';
 import 'package:exploraec/main.dart';
 import 'package:exploraec/models/gasto.dart';
 import 'package:exploraec/models/place.dart';
+import 'package:exploraec/services/api_client.dart';
 
 void main() {
   final lugaresIniciales = List.of(lugaresEjemplo);
@@ -162,10 +165,17 @@ void main() {
     expect(find.text('Expenses'), findsOneWidget);
   });
 
-  testWidgets('La pestaña Gastos muestra el formulario y la dirección del backend', (tester) async {
+  testWidgets('Sin sesión, Gastos pide iniciar sesión y abre el formulario', (tester) async {
+    FlutterSecureStorage.setMockInitialValues({});
+    Get.put(ApiClient(), permanent: true);
+    Get.put(AuthController(), permanent: true);
     await abrirApp(tester);
 
     await tester.tap(find.byIcon(Icons.receipt_long));
+    await tester.pumpAndSettle();
+    expect(find.text('Inicia sesión para ver los gastos de tu viaje.'), findsOneWidget);
+
+    await tester.tap(find.text('Iniciar sesión'));
     await tester.pumpAndSettle();
     expect(find.text('Entrar'), findsOneWidget);
     expect(find.text('Servidor: http://10.0.2.2:8000'), findsOneWidget);

@@ -1,133 +1,56 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:http/http.dart' as http;
-
-import '../config/api_config.dart';
 import '../models/gasto.dart';
-import 'api_exception.dart';
+import 'api_client.dart';
 
 class GastosApiService {
-  // Solo en memoria: se pierde al cerrar la app.
-  String? _token;
+  GastosApiService(this._client);
 
-  bool get tieneToken => _token != null;
-
-  void cerrarSesion() => _token = null;
-
-  void invalidarTokenParaPruebas() => _token = 'token-invalido';
-
-  Future<void> registrar(String email, String password) async {
-    await _enviar(() => http.post(
-          Uri.parse('${ApiConfig.baseUrl}/usuarios/'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'email': email, 'password': password}),
-        ));
-  }
-
-  Future<void> login(String email, String password) async {
-    final respuesta = await _enviar(() => http.post(
-          Uri.parse('${ApiConfig.baseUrl}/usuarios/token'),
-          // Map como body => form-urlencoded (el login no acepta JSON).
-          body: {'username': email, 'password': password},
-        ));
-    final json = jsonDecode(utf8.decode(respuesta.bodyBytes));
-    final token = json is Map ? json['access_token'] : null;
-    if (token is! String) {
-      throw ApiException('Respuesta inesperada del servidor al iniciar sesión.');
-    }
-    _token = token;
-  }
+  final ApiClient _client;
 
   // El id da nombre a la caja de Hive de cada usuario (`gastos_<id>`).
   Future<int> obtenerIdUsuario() async {
-    final respuesta = await _get('/usuarios/me');
-    final json = jsonDecode(utf8.decode(respuesta.bodyBytes));
-    final id = json is Map ? json['id'] : null;
+    final r = await _client.get('/usuarios/me');
+    final id = r.data is Map ? (r.data as Map)['id'] : null;
     if (id is! int) {
       throw ApiException('Respuesta inesperada del servidor al leer tu perfil.');
     }
     return id;
   }
 
-  Future<({List<Gasto> gastos, int total})> listarGastos({
-    int skip = 0,
-    int limit = 20,
-  }) async {
-    final respuesta = await _get('/gastos/', {'skip': '$skip', 'limit': '$limit'});
-    final json = jsonDecode(utf8.decode(respuesta.bodyBytes));
+  // La barra final importa: sin ella el servidor responde 307.
+  Future<({List<Gasto> gastos, int total})> listarGastos({int skip = 0, int limit = 20}) async {
+    final r = await _client.get('/gastos/', query: {'skip': skip, 'limit': limit});
+    final json = r.data;
     if (json is! List) {
       throw ApiException('Respuesta inesperada del servidor al listar gastos.');
     }
-    final gastos = json
-        .whereType<Map<String, dynamic>>()
-        .map(Gasto.fromJson)
-        .toList();
-    // El total no viene en el cuerpo sino en la cabecera.
-    final total = int.tryParse(respuesta.headers['x-total-count'] ?? '') ?? gastos.length;
+    final gastos = json.whereType<Map<String, dynamic>>().map(Gasto.fromJson).toList();
+    final total = int.tryParse(r.headers.value('x-total-count') ?? '') ?? gastos.length;
     return (gastos: gastos, total: total);
   }
 
-  Future<http.Response> _get(String ruta, [Map<String, String>? query]) {
-    final token = _token;
-    if (token == null) {
-      throw ApiException('Inicia sesión para ver tus gastos.', statusCode: 401);
+  Future<({List<String> categorias, double limite})> listarCategorias() async {
+    final r = await _client.get('/gastos/categorias');
+    final json = r.data;
+    if (json is! Map || json['categorias'] is! List) {
+      throw ApiException('Respuesta inesperada del servidor al leer las categorías.');
     }
-    final uri = Uri.parse('${ApiConfig.baseUrl}$ruta').replace(queryParameters: query);
-    return _enviar(() => http.get(uri, headers: {'Authorization': 'Bearer $token'}));
+    return (
+      categorias: (json['categorias'] as List).map((c) => '$c').toList(),
+      limite: (json['limite_por_categoria'] as num?)?.toDouble() ?? 500,
+    );
   }
 
-  Future<http.Response> _enviar(Future<http.Response> Function() peticion) async {
-    try {
-      final respuesta = await peticion().timeout(const Duration(seconds: 15));
-      if (respuesta.statusCode >= 200 && respuesta.statusCode < 300) {
-        return respuesta;
-      }
-      throw _errorHttp(respuesta);
-    } on SocketException {
-      throw ApiException(
-          'No hay conexión con el servidor. Revisa tu red y que el backend esté encendido.');
-    } on http.ClientException {
-      throw ApiException(
-          'No hay conexión con el servidor. Revisa tu red y que el backend esté encendido.');
-    } on TimeoutException {
-      throw ApiException(
-          'El servidor tardó demasiado en responder. Revisa tu conexión e inténtalo de nuevo.');
-    }
+  Future<Gasto> crear(Map<String, dynamic> datos) async {
+    final r = await _client.post('/gastos/', data: datos);
+    return Gasto.fromJson(Map<String, dynamic>.from(r.data as Map));
   }
 
-  ApiException _errorHttp(http.Response r) {
-    final codigo = r.statusCode;
-    if (codigo == 401) {
-      return ApiException(
-          'Tu sesión caducó o las credenciales no son válidas. Inicia sesión de nuevo.',
-          statusCode: 401);
-    }
-    if (codigo >= 500) {
-      return ApiException('El servidor tuvo un problema. Inténtalo más tarde.',
-          statusCode: codigo);
-    }
-    // 422 trae `detail` como lista; el resto, como texto.
-    return ApiException(_leerDetail(r, codigo), statusCode: codigo);
+  Future<Gasto> actualizar(int id, Map<String, dynamic> cambios) async {
+    final r = await _client.patch('/gastos/$id', data: cambios);
+    return Gasto.fromJson(Map<String, dynamic>.from(r.data as Map));
   }
 
-  String _leerDetail(http.Response r, int codigo) {
-    try {
-      final json = jsonDecode(utf8.decode(r.bodyBytes));
-      final detail = json is Map ? json['detail'] : null;
-      if (detail is String) return detail;
-      if (detail is List) {
-        final partes = detail.whereType<Map>().map((e) {
-          final loc = e['loc'];
-          final campo = loc is List && loc.isNotEmpty ? '${loc.last}' : 'dato';
-          return '$campo: ${e['msg']}';
-        });
-        return 'Datos inválidos — ${partes.join('; ')}';
-      }
-    } on FormatException {
-      // cuerpo que no es JSON: cae al mensaje genérico
-    }
-    return 'La petición no pudo completarse (código $codigo).';
+  Future<void> eliminar(int id) async {
+    await _client.delete('/gastos/$id');
   }
 }

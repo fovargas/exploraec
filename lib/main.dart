@@ -3,11 +3,13 @@ import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'bindings/places_binding.dart';
+import 'controllers/auth_controller.dart';
 import 'i18n/app_translations.dart';
 import 'screens/favorites_screen.dart';
 import 'screens/gastos_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/map_screen.dart';
+import 'services/api_client.dart';
 import 'services/settings_service.dart';
 import 'theme/app_theme.dart';
 
@@ -17,6 +19,9 @@ Future<void> main() async {
   // La caja de gastos se abre al iniciar sesión: depende del usuario.
   await Hive.openBox<Map>('favoritos');
   await SettingsService.abrir();
+  // Al crearse, AuthController intenta restaurar la sesión guardada.
+  Get.put(ApiClient(), permanent: true);
+  Get.put(AuthController(), permanent: true);
   runApp(const ExploraEcApp());
 }
 
