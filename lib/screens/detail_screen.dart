@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import '../models/place.dart';
 import '../services/location_service.dart';
 
+/// Pantalla de Detalle: recibe un [Place] completo por su constructor,
+/// sin volver a consultar ninguna lista — Sesión 2. Desde la Sesión 5,
+/// cuando se llega desde el Mapa, recibe además la distancia ya calculada
+/// (no vuelve a pedir la ubicación: el Mapa ya la tenía).
 class DetailScreen extends StatelessWidget {
   final Place place;
   final double? distanciaMetros;

@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+/// Tema visual de ExploraEC — Sesión 3.
+///
+/// Usa la misma paleta de marca que las diapositivas y documentos del curso
+/// (ver `TECH_STACK.md`): navy para texto/AppBar, teal como color primario,
+/// naranja como acento. Un solo lugar define los colores de toda la app —
+/// cambiar uno aquí lo cambia en cada pantalla que use `Theme.of(context)`.
 class AppTheme {
   AppTheme._();
 
@@ -47,7 +53,11 @@ class AppTheme {
     );
   }
 
-  /// No fija colores de texto ni fondo: los del tema claro serían ilegibles en oscuro.
+  /// Tema oscuro (Paso 6, opcional). Misma semilla teal que `theme`, pero con
+  /// `Brightness.dark`: Flutter genera la paleta oscura completa y cada widget
+  /// que consulta `Theme.of(context)` la toma sin cambiar una sola línea.
+  /// A propósito NO fija colores de texto ni de fondo — los que fijaba `theme`
+  /// (navy sobre blanco) serían ilegibles sobre un fondo oscuro.
   static ThemeData get darkTheme {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: teal,
@@ -78,6 +88,9 @@ class AppTheme {
   }
 }
 
+/// Constantes de espaciado — un único lugar para los valores de `EdgeInsets`
+/// y `SizedBox` usados en toda la app, en vez de números sueltos repetidos
+/// en cada widget.
 class AppSpacing {
   AppSpacing._();
 

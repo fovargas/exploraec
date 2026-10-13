@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
+/// Estado vacío reutilizable — Sesión 3. Se muestra cuando la carga
+/// terminó sin error, pero no hay ningún dato que mostrar.
 class EmptyView extends StatelessWidget {
   final String mensaje;
   final IconData icono;

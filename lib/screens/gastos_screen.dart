@@ -14,6 +14,9 @@ import '../widgets/sin_sesion_view.dart';
 import 'cambiar_password_screen.dart';
 import 'gasto_form_screen.dart';
 
+/// Sección «Gastos del viaje» — Sesión 6. Desde la Sesión 8 solo se muestra
+/// con sesión iniciada (si no, `SinSesionView`) y permite crear, editar y
+/// eliminar gastos.
 class GastosScreen extends GetView<GastosController> {
   const GastosScreen({super.key});
 
@@ -21,6 +24,9 @@ class GastosScreen extends GetView<GastosController> {
   Widget build(BuildContext context) {
     final auth = Get.find<AuthController>();
     return Obx(() {
+      // Por qué: los gastos son de una persona concreta; sin sesión el servidor
+      // respondería 401. El `Obx` lee `estaAutenticado`, así que la pantalla
+      // cambia sola al iniciar o cerrar sesión.
       if (!auth.estaAutenticado) return const SinSesionView();
       return _buildGastos(context, auth);
     });
@@ -29,13 +35,7 @@ class GastosScreen extends GetView<GastosController> {
   Widget _buildGastos(BuildContext context, AuthController auth) {
     return Scaffold(
       appBar: AppBar(
-        title: Obx(() => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('${'gastos'.tr} (${controller.totalEnServidor.value})'),
-                Text(auth.usuario.value?.email ?? '', style: Theme.of(context).textTheme.bodySmall),
-              ],
-            )),
+        title: Obx(() => Text('${'gastos'.tr} (${controller.totalEnServidor.value})')),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -46,7 +46,7 @@ class GastosScreen extends GetView<GastosController> {
             onSelected: (valor) {
               if (valor == 'salir') auth.cerrarSesion();
               if (valor == 'invalidar') auth.invalidarTokenParaPruebas();
-              if (valor == 'password') Get.to(() => const CambiarPasswordScreen());
+                            if (valor == 'password') Get.to(() => const CambiarPasswordScreen());
             },
             itemBuilder: (context) => [
               const PopupMenuItem(value: 'password', child: Text('Cambiar contraseña')),
@@ -57,6 +57,7 @@ class GastosScreen extends GetView<GastosController> {
           ),
         ],
       ),
+      // Por qué: el botón «+» abre el formulario vacío para crear un gasto.
       floatingActionButton: FloatingActionButton(
         onPressed: () => Get.to(() => const GastoFormScreen()),
         child: const Icon(Icons.add),
@@ -109,6 +110,7 @@ class GastosScreen extends GetView<GastosController> {
         return ListTile(
           title: Text(g.descripcion),
           subtitle: Text('${g.categoria} · ${g.fecha}'),
+          // Por qué: tocar una fila abre el mismo formulario, ya relleno.
           onTap: () => Get.to(() => GastoFormScreen(gasto: g)),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
@@ -126,6 +128,8 @@ class GastosScreen extends GetView<GastosController> {
     );
   }
 
+  /// Pide confirmación antes de borrar; si el servidor falla, avisa con el
+  /// mensaje que devolvió.
   Future<void> confirmarEliminar(BuildContext context, Gasto g) async {
     final confirmado = await showDialog<bool>(
       context: context,

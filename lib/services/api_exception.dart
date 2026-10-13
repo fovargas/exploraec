@@ -2,11 +2,16 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 
+/// Error de red o HTTP ya traducido a un mensaje legible — Sesión 6. Desde la
+/// Sesión 8 se construye a partir de un `DioException` con
+/// `ApiException.desde(...)`. `statusCode` es null cuando el fallo no vino de
+/// una respuesta HTTP (sin conexión, tiempo agotado).
 class ApiException implements Exception {
   final String mensaje;
   final int? statusCode;
   ApiException(this.mensaje, {this.statusCode});
 
+  /// Único lugar donde un error de `dio` se convierte en texto para el usuario.
   factory ApiException.desde(DioException e) {
     switch (e.type) {
       case DioExceptionType.connectionTimeout:

@@ -1,3 +1,4 @@
+/// Usuario de la sesión, tal como lo devuelve `GET /usuarios/me` — Sesión 8.
 class Usuario {
   final int id;
   final String email;

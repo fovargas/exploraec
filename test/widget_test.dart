@@ -173,7 +173,7 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.receipt_long));
     await tester.pumpAndSettle();
-    expect(find.text('Inicia sesión para ver los gastos de tu viaje.'), findsOneWidget);
+    expect(find.text('Inicia sesión para continuar.'), findsOneWidget);
 
     await tester.tap(find.text('Iniciar sesión'));
     await tester.pumpAndSettle();

@@ -4,6 +4,12 @@ import 'package:get/get.dart';
 import '../controllers/places_controller.dart';
 import '../models/place.dart';
 
+/// Formulario "Agregar lugar": valida y agrega un [Place] — Sesión 2.
+/// Desde la Sesión 4, el nuevo lugar se agrega vía `PlacesController`
+/// (`Get.find`) en vez de mutar `lugaresEjemplo` directamente y recargar a
+/// mano al volver: Inicio (y, más adelante, el Mapa) lo muestran de
+/// inmediato. Persistencia real (que sobreviva reiniciar la app) llega en
+/// la Sesión 7.
 class AddPlaceScreen extends StatefulWidget {
   const AddPlaceScreen({super.key});
 

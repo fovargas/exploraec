@@ -6,7 +6,10 @@ import '../models/gasto.dart';
 import '../services/api_exception.dart';
 import '../theme/app_theme.dart';
 
-// Si el servidor rechaza el gasto, el formulario no se cierra y muestra el motivo.
+/// Formulario para crear (`gasto == null`) o editar un gasto — Sesión 8. Las
+/// categorías vienen del servidor. Si el servidor rechaza el gasto (por
+/// ejemplo, supera el límite de 500), el formulario NO se cierra: muestra el
+/// mensaje y conserva lo escrito.
 class GastoFormScreen extends StatefulWidget {
   final Gasto? gasto;
   const GastoFormScreen({super.key, this.gasto});

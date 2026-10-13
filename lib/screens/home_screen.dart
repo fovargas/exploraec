@@ -11,6 +11,13 @@ import '../widgets/place_card.dart';
 import 'add_place_screen.dart';
 import '../services/settings_service.dart';
 
+/// Pantalla de Inicio: lista de lugares — Sesión 2. Desde la Sesión 4 ya
+/// no mantiene su propio `Future`/`setState`: `GetView<PlacesController>`
+/// da acceso directo al controller ya registrado por `PlacesBinding`
+/// (equivalente a `Get.find<PlacesController>()`, pero sin repetirlo en
+/// cada método), y `Obx` reconstruye la pantalla sola cuando el controller
+/// cambia. Las próximas pantallas (Mapa en la Sesión 5, Favoritos en la
+/// Sesión 7) leen del mismo controller.
 class HomeScreen extends GetView<PlacesController> {
   const HomeScreen({super.key});
 

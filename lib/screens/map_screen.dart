@@ -11,6 +11,12 @@ import '../widgets/error_view.dart';
 import '../widgets/loading_view.dart';
 import 'detail_screen.dart';
 
+/// Pantalla de Mapa real — Sesión 5. Reemplaza a `MapPlaceholderScreen`
+/// (Sesión 2). Teselas de OpenStreetMap, sin API key: ver la política de
+/// uso de tiles de OSM citada en la teoría de esta sesión. Lee del mismo
+/// `PlacesController` que `HomeScreen` (Sesión 4): los lugares salen de
+/// `controller.lugares` y la posición se guarda en `controller.posicion`,
+/// de modo que se pide al sistema operativo una sola vez.
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
 
@@ -44,6 +50,10 @@ class _MapScreenState extends State<MapScreen> {
         }
         return _buildMapa(context, controller.posicion.value!, controller.lugares);
       }),
+      // Por qué: el `mapController` de arriba ya está conectado al
+      // `FlutterMap`; este botón lo usa como "control remoto" para volver
+      // a la posición del usuario con `move(...)` después de arrastrar el
+      // mapa, sin que la persona tenga que buscarse a mano.
       floatingActionButton: FloatingActionButton(
         tooltip: 'Centrar en mi ubicación',
         onPressed: () {
@@ -62,7 +72,9 @@ class _MapScreenState extends State<MapScreen> {
       mapController: mapController,
       options: MapOptions(initialCenter: miUbicacion, initialZoom: 15),
       children: [
-        // La política de tiles de OSM exige un userAgentPackageName que identifique la app.
+        // La política de uso de tiles de OSM exige un userAgentPackageName
+        // real que identifique la app — no dejar el valor de ejemplo del
+        // paquete en una app publicada.
         TileLayer(
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           userAgentPackageName: 'com.tmo.exploraec',

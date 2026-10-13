@@ -5,6 +5,10 @@ import '../controllers/places_controller.dart';
 import '../widgets/empty_view.dart';
 import '../widgets/place_card.dart';
 
+/// Favoritos persistentes con Hive — Sesión 7. Reemplaza el placeholder
+/// fijo de la Sesión 2: ahora lee `controller.favoritos`, la lista
+/// reactiva respaldada por la caja de Hive que sobrevive reiniciar la app
+/// (ver `PlacesController`).
 class FavoritesScreen extends GetView<PlacesController> {
   const FavoritesScreen({super.key});
 

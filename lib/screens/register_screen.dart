@@ -5,6 +5,8 @@ import '../controllers/auth_controller.dart';
 import '../theme/app_theme.dart';
 import '../utils/validadores.dart';
 
+/// Registro de una cuenta nueva — Sesión 8. Si el servidor acepta el
+/// registro, `AuthController` inicia la sesión solo.
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 

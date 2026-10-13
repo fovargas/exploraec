@@ -1,3 +1,5 @@
+/// Modelo de datos de ExploraEC — Sesión 2. Desde la Sesión 7 se puede
+/// guardar en Hive (favoritos) con `toMap()`/`Place.fromMap()`.
 class Place {
   final String id;
   final String nombre;
@@ -15,6 +17,9 @@ class Place {
     required this.lng,
   });
 
+  /// Serialización manual para guardar un favorito en Hive — Sesión 7. Todos
+  /// los campos son tipos primitivos (`String`/`double`), así que un
+  /// `Map<String, dynamic>` alcanza sin necesitar un `TypeAdapter` generado.
   Map<String, dynamic> toMap() => {
         'id': id,
         'nombre': nombre,
@@ -85,7 +90,12 @@ final List<Place> lugaresEjemplo = [
   ),
 ];
 
-/// Simula una llamada de red. forzarError/forzarVacio permiten probar los estados de error y vacío.
+/// Simula una llamada de red (Sesión 3): misma firma que la Sesión 6 va a
+/// usar con la Overpass API real — solo cambia la implementación interna,
+/// la interfaz (`Future<List<Place>>`) no cambia.
+///
+/// [forzarError] y [forzarVacio] existen solo para la práctica de hoy, para
+/// poder demostrar los 3 estados sin depender de una red real.
 Future<List<Place>> fetchLugaresSimulado({bool forzarError = false, bool forzarVacio = false}) async {
   await Future.delayed(const Duration(seconds: 1));
   if (forzarError) {

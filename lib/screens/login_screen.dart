@@ -6,6 +6,8 @@ import '../controllers/auth_controller.dart';
 import '../theme/app_theme.dart';
 import 'register_screen.dart';
 
+/// Inicio de sesión — Sesión 8. Muestra el error del servidor debajo del
+/// formulario y deshabilita el botón mientras `cargando` es verdadero.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 

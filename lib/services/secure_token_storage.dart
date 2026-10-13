@@ -1,6 +1,8 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-// Keystore/Keychain: a diferencia de Hive, el sistema cifra el valor.
+/// Guarda el token JWT en el almacenamiento seguro del sistema (Keystore en
+/// Android, Keychain en iOS) — Sesión 8. Hive y SharedPreferences guardan en
+/// claro: aquí el sistema cifra el valor. Solo tres operaciones.
 class SecureTokenStorage {
   SecureTokenStorage([FlutterSecureStorage? almacen])
       : _almacen = almacen ?? const FlutterSecureStorage();

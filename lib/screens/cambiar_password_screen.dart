@@ -5,6 +5,9 @@ import '../controllers/auth_controller.dart';
 import '../theme/app_theme.dart';
 import '../utils/validadores.dart';
 
+/// Cambiar la contraseña — Sesión 8, Paso 9 (opcional). Si el servidor
+/// acepta el cambio (204, sin cuerpo), `AuthController` cierra la sesión para
+/// que la persona entre con la contraseña nueva.
 class CambiarPasswordScreen extends StatefulWidget {
   const CambiarPasswordScreen({super.key});
 

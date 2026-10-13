@@ -5,14 +5,19 @@ import '../controllers/auth_controller.dart';
 import '../screens/login_screen.dart';
 import '../theme/app_theme.dart';
 
+/// Lo que ve la sección Gastos cuando no hay sesión — Sesión 8. Mientras se
+/// comprueba el token guardado muestra un indicador; después, el motivo (si
+/// lo hay) y el botón para iniciar sesión.
 class SinSesionView extends StatelessWidget {
-  const SinSesionView({super.key});
+  /// Título de la barra: por defecto «Gastos»; el Asistente usa el suyo.
+  final String? titulo;
+  const SinSesionView({super.key, this.titulo});
 
   @override
   Widget build(BuildContext context) {
     final auth = Get.find<AuthController>();
     return Scaffold(
-      appBar: AppBar(title: Text('gastos'.tr)),
+      appBar: AppBar(title: Text(titulo ?? 'gastos'.tr)),
       body: Obx(() {
         if (auth.restaurando.value) {
           return const Center(child: CircularProgressIndicator());
@@ -25,7 +30,7 @@ class SinSesionView extends StatelessWidget {
               children: [
                 Icon(Icons.lock_outline, size: 56, color: Theme.of(context).colorScheme.outline),
                 const SizedBox(height: AppSpacing.md),
-                const Text('Inicia sesión para ver los gastos de tu viaje.', textAlign: TextAlign.center),
+                const Text('Inicia sesión para continuar.', textAlign: TextAlign.center),
                 if (auth.avisoSesion.value.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.md),
                   Text(auth.avisoSesion.value,
