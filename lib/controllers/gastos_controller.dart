@@ -23,6 +23,19 @@ class GastosController extends GetxController {
   final RxString mensajeError = ''.obs;
   final RxInt totalEnServidor = 0.obs;
 
+  /// Filtro de la lista; `null` muestra todas las categorías.
+  final RxnString categoriaSeleccionada = RxnString();
+
+  List<String> get categoriasEnGastos => gastos.map((g) => g.categoria).toSet().toList();
+
+  List<Gasto> get gastosFiltrados {
+    final categoria = categoriaSeleccionada.value;
+    if (categoria == null) return gastos;
+    return gastos.where((g) => g.categoria == categoria).toList();
+  }
+
+  void seleccionarCategoria(String? categoria) => categoriaSeleccionada.value = categoria;
+
   /// Categorías que define el backend (`GET /gastos/categorias`).
   final RxList<String> categorias = <String>[].obs;
 
@@ -74,6 +87,10 @@ class GastosController extends GetxController {
     gastos.value = lista;
     totalEnServidor.value = lista.length;
     desdeCache.value = cache;
+    // Si se borró el último gasto de la categoría filtrada, volver a «Todas».
+    if (!categoriasEnGastos.contains(categoriaSeleccionada.value)) {
+      categoriaSeleccionada.value = null;
+    }
   }
 
   Future<void> cargarCategorias() async {
@@ -126,6 +143,7 @@ class GastosController extends GetxController {
     await _repository.vaciar();
     gastos.clear();
     categorias.clear();
+    categoriaSeleccionada.value = null;
     totalEnServidor.value = 0;
     desdeCache.value = false;
     mensajeError.value = '';

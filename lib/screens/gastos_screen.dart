@@ -97,15 +97,38 @@ class GastosScreen extends GetView<GastosController> {
                   ),
                 ],
               ),
+            _buildFiltro(),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: controller.cargarGastos,
-                child: _buildLista(context, controller.gastos),
+                child: _buildLista(context, controller.gastosFiltrados),
               ),
             ),
           ],
         );
       }),
+    );
+  }
+
+  Widget _buildFiltro() {
+    final seleccionada = controller.categoriaSeleccionada.value;
+    Widget chip(String etiqueta, String? categoria) => Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: ChoiceChip(
+            label: Text(etiqueta),
+            selected: seleccionada == categoria,
+            onSelected: (_) => controller.seleccionarCategoria(categoria),
+          ),
+        );
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          chip('Todas', null),
+          for (final c in controller.categoriasEnGastos) chip(c, c),
+        ],
+      ),
     );
   }
 
