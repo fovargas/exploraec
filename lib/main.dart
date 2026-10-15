@@ -22,7 +22,6 @@ Future<void> main() async {
   // operativo la carpeta donde guardar sus archivos — por eso `main` ahora
   // es `async` y arranca con `ensureInitialized()` antes que nada más.
   WidgetsFlutterBinding.ensureInitialized();
-  // Sesión 10: qué hacer con los errores que nadie esperaba (ver `ReporteErrores`).
   ReporteErrores.instalar();
   await Hive.initFlutter();
   // Solo la caja de favoritos: la de gastos depende de QUIÉN inicie sesión,
@@ -57,8 +56,7 @@ class ExploraEcApp extends StatelessWidget {
       translations: AppTranslations(),
       locale: SettingsService.idioma,
       fallbackLocale: const Locale('es', 'EC'),
-      // Textos propios de Flutter (licencias, selector de fecha, etc.) en el
-      // mismo idioma que la app.
+      // Textos propios de Flutter (licencias, selector de fecha) en el idioma de la app.
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

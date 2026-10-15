@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Lo que ve la persona cuando una pantalla falla al construirse — Sesión 10.
-/// Reemplaza a la pantalla roja de depuración. No usa `Theme` ni `Scaffold`
-/// a propósito: puede aparecer en cualquier parte del árbol, incluso fuera de
-/// `MaterialApp`, y no debe fallar a su vez. El fondo es claro, así que pide
-/// íconos oscuros en la barra de estado (si no, el reloj se vería blanco
-/// sobre blanco).
+/// Reemplaza a la pantalla roja cuando un widget falla al construirse.
+/// Sin `Theme` ni `Scaffold`: puede aparecer fuera de `MaterialApp`.
 class ErrorPantallaView extends StatelessWidget {
   const ErrorPantallaView({super.key});
 

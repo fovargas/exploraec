@@ -42,15 +42,12 @@ class _AssistantScreenState extends State<AssistantScreen> {
       _respuesta = null;
     });
     try {
-      // Por qué: el asistente solo necesita totales, no cada gasto. Se pide el
-      // resumen por categoría al backend (con el token de tu sesión) y se envía
-      // al proxy junto con la pregunta. La respuesta se muestra en pantalla.
+      // Al proxy solo se envían totales por categoría, no cada gasto.
       final resumen = await Get.find<GastosController>().obtenerResumen();
       final r = await Get.find<AiAssistantService>().preguntar(consulta, resumen);
       setState(() => _respuesta = r.respuesta);
 
-      // Por qué: si la IA propone registrar un gasto, la app NO lo hace sola.
-      // Muestra un diálogo y solo si la persona acepta se llama al backend.
+      // Un gasto propuesto por la IA solo se crea si la persona lo confirma.
       if (r.accion != null) await confirmarAccion(r.accion!);
     } on ApiException catch (e) {
       if (mounted) setState(() => _error = e.mensaje);

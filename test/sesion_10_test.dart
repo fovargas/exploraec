@@ -1,5 +1,3 @@
-// Solo los usan las pruebas comentadas del Paso 3.
-// ignore_for_file: unused_import, unused_element
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' show PlatformDispatcher;
@@ -17,8 +15,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
-/// Servidor falso que solo cuenta cuántas peticiones recibe: sirve para
-/// comprobar que la app NO llama al servidor cuando el formulario es inválido.
+/// Servidor falso que solo cuenta las peticiones que recibe.
 class _Servidor implements HttpClientAdapter {
   final peticiones = <String>[];
 
@@ -43,8 +40,7 @@ class _Servidor implements HttpClientAdapter {
   return (servidor: servidor, auth: Get.put(AuthController()));
 }
 
-/// `ReporteErrores.instalar()` cambia manejadores globales: se restauran al
-/// terminar para no afectar a las demás pruebas.
+/// `instalar()` cambia manejadores globales: se restauran al terminar la prueba.
 void _restaurarManejadoresAlTerminar() {
   final onError = FlutterError.onError;
   final builder = ErrorWidget.builder;
@@ -57,8 +53,6 @@ void _restaurarManejadoresAlTerminar() {
 }
 
 void main() {
-  // ---- Ya vienen resueltas: pasan desde el principio ----
-
   test('limpiar() quita los tokens y las cabeceras Bearer de un mensaje', () {
     const jwt = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhQGIuY29tIn0.firma123';
     final limpio = ReporteErrores.limpiar('fallo con Authorization: Bearer $jwt y token $jwt');
@@ -76,8 +70,6 @@ void main() {
     expect(ReporteErrores.recientes.join(), isNot(contains('abc.def.ghi')));
   });
 
-  // ---- Paso 2: pasa cuando descomentas el bloque de `ReporteErrores.instalar()` ----
-
   test('Paso 2 — instalar() reemplaza la pantalla roja por la vista amistosa y absorbe los errores asíncronos', () {
     _restaurarManejadoresAlTerminar();
     ReporteErrores.instalar();
@@ -85,12 +77,6 @@ void main() {
     expect(PlatformDispatcher.instance.onError!(StateError('x'), StackTrace.empty), isTrue);
   });
 
-  // ---- Paso 3: pruebas de widgets (están comentadas: las descomentas tú) ----
-
-  // Por qué: una prueba de widget arma una pantalla, escribe y toca como lo haría
-  // una persona, y comprueba lo que se ve. Estas tres no necesitan el backend ni
-  // el emulador: usan un servidor falso.
-  // TODO(sesion-10) Paso 3: descomenta las 27 líneas de abajo (pruebas de widgets).
   testWidgets('Paso 3 — sin sesión se ve el motivo y el botón para iniciar sesión', (tester) async {
     final montaje = _montar();
     montaje.auth.avisoSesion.value = 'Tu sesión caducó, inicia sesión de nuevo.';

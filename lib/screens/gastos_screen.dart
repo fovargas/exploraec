@@ -25,9 +25,7 @@ class GastosScreen extends GetView<GastosController> {
   Widget build(BuildContext context) {
     final auth = Get.find<AuthController>();
     return Obx(() {
-      // Por qué: los gastos son de una persona concreta; sin sesión el servidor
-      // respondería 401. El `Obx` lee `estaAutenticado`, así que la pantalla
-      // cambia sola al iniciar o cerrar sesión.
+      // Sin sesión el servidor respondería 401.
       if (!auth.estaAutenticado) return const SinSesionView();
       return _buildGastos(context, auth);
     });
@@ -48,20 +46,17 @@ class GastosScreen extends GetView<GastosController> {
               if (valor == 'salir') auth.cerrarSesion();
               if (valor == 'invalidar') auth.invalidarTokenParaPruebas();
               if (valor == 'password') Get.to(() => const CambiarPasswordScreen());
-              // Solo práctica (Sesión 10, Paso 2): provocan errores a propósito.
+              // Solo práctica: provocan errores a propósito.
               if (valor == 'error_pantalla') Get.to(() => const PantallaConFallo());
               if (valor == 'error_async') {
                 Future<void>.delayed(Duration.zero, () => throw StateError('Fallo asíncrono provocado a propósito'));
               }
-              // Por qué: pantalla opcional con las licencias de los paquetes que usa la app.
-              // TODO(sesion-10) OPCIONAL Paso 10: descomenta la línea de abajo (abrir «Acerca de»).
-              // if (valor == 'acerca') showLicensePage(context: context, applicationName: 'ExploraEC', applicationVersion: '1.0.0');
+              if (valor == 'acerca') showLicensePage(context: context, applicationName: 'ExploraEC', applicationVersion: '1.0.0');
             },
             itemBuilder: (context) => [
               const PopupMenuItem(value: 'password', child: Text('Cambiar contraseña')),
               const PopupMenuItem(value: 'salir', child: Text('Cerrar sesión')),
-              // TODO(sesion-10) OPCIONAL Paso 10: descomenta la línea de abajo (opción del menú).
-              // const PopupMenuItem(value: 'acerca', child: Text('Acerca de')),
+              const PopupMenuItem(value: 'acerca', child: Text('Acerca de')),
               if (kDebugMode) ...const [
                 PopupMenuItem(value: 'invalidar', child: Text('Invalidar token (solo práctica)')),
                 PopupMenuItem(value: 'error_pantalla', child: Text('Error de pantalla (solo práctica)')),
@@ -71,7 +66,6 @@ class GastosScreen extends GetView<GastosController> {
           ),
         ],
       ),
-      // Por qué: el botón «+» abre el formulario vacío para crear un gasto.
       floatingActionButton: FloatingActionButton(
         onPressed: () => Get.to(() => const GastoFormScreen()),
         child: const Icon(Icons.add),
@@ -124,7 +118,6 @@ class GastosScreen extends GetView<GastosController> {
         return ListTile(
           title: Text(g.descripcion),
           subtitle: Text('${g.categoria} · ${g.fecha}'),
-          // Por qué: tocar una fila abre el mismo formulario, ya relleno.
           onTap: () => Get.to(() => GastoFormScreen(gasto: g)),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
