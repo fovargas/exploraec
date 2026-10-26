@@ -110,6 +110,7 @@ class GastosScreen extends GetView<GastosController> {
     );
   }
 
+  // «Todas» usa categoría null; el resto sale de los gastos cargados.
   Widget _buildFiltro() {
     final seleccionada = controller.categoriaSeleccionada.value;
     Widget chip(String etiqueta, String? categoria) => Padding(
