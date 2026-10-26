@@ -7,6 +7,7 @@ import '../controllers/gastos_controller.dart';
 import '../controllers/places_controller.dart' show EstadoCarga;
 import '../models/gasto.dart';
 import '../services/api_exception.dart';
+import 'pantalla_con_fallo.dart';
 import '../widgets/empty_view.dart';
 import '../widgets/error_view.dart';
 import '../widgets/loading_view.dart';
@@ -24,9 +25,7 @@ class GastosScreen extends GetView<GastosController> {
   Widget build(BuildContext context) {
     final auth = Get.find<AuthController>();
     return Obx(() {
-      // Por qué: los gastos son de una persona concreta; sin sesión el servidor
-      // respondería 401. El `Obx` lee `estaAutenticado`, así que la pantalla
-      // cambia sola al iniciar o cerrar sesión.
+      // Sin sesión el servidor respondería 401.
       if (!auth.estaAutenticado) return const SinSesionView();
       return _buildGastos(context, auth);
     });
@@ -46,18 +45,27 @@ class GastosScreen extends GetView<GastosController> {
             onSelected: (valor) {
               if (valor == 'salir') auth.cerrarSesion();
               if (valor == 'invalidar') auth.invalidarTokenParaPruebas();
-                            if (valor == 'password') Get.to(() => const CambiarPasswordScreen());
+              if (valor == 'password') Get.to(() => const CambiarPasswordScreen());
+              // Solo práctica: provocan errores a propósito.
+              if (valor == 'error_pantalla') Get.to(() => const PantallaConFallo());
+              if (valor == 'error_async') {
+                Future<void>.delayed(Duration.zero, () => throw StateError('Fallo asíncrono provocado a propósito'));
+              }
+              if (valor == 'acerca') showLicensePage(context: context, applicationName: 'ExploraEC', applicationVersion: '1.0.0');
             },
             itemBuilder: (context) => [
               const PopupMenuItem(value: 'password', child: Text('Cambiar contraseña')),
               const PopupMenuItem(value: 'salir', child: Text('Cerrar sesión')),
-              if (kDebugMode)
-                const PopupMenuItem(value: 'invalidar', child: Text('Invalidar token (solo práctica)')),
+              const PopupMenuItem(value: 'acerca', child: Text('Acerca de')),
+              if (kDebugMode) ...const [
+                PopupMenuItem(value: 'invalidar', child: Text('Invalidar token (solo práctica)')),
+                PopupMenuItem(value: 'error_pantalla', child: Text('Error de pantalla (solo práctica)')),
+                PopupMenuItem(value: 'error_async', child: Text('Error asíncrono (solo práctica)')),
+              ],
             ],
           ),
         ],
       ),
-      // Por qué: el botón «+» abre el formulario vacío para crear un gasto.
       floatingActionButton: FloatingActionButton(
         onPressed: () => Get.to(() => const GastoFormScreen()),
         child: const Icon(Icons.add),
@@ -89,15 +97,39 @@ class GastosScreen extends GetView<GastosController> {
                   ),
                 ],
               ),
+            _buildFiltro(),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: controller.cargarGastos,
-                child: _buildLista(context, controller.gastos),
+                child: _buildLista(context, controller.gastosFiltrados),
               ),
             ),
           ],
         );
       }),
+    );
+  }
+
+  // «Todas» usa categoría null; el resto sale de los gastos cargados.
+  Widget _buildFiltro() {
+    final seleccionada = controller.categoriaSeleccionada.value;
+    Widget chip(String etiqueta, String? categoria) => Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: ChoiceChip(
+            label: Text(etiqueta),
+            selected: seleccionada == categoria,
+            onSelected: (_) => controller.seleccionarCategoria(categoria),
+          ),
+        );
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          chip('Todas', null),
+          for (final c in controller.categoriasEnGastos) chip(c, c),
+        ],
+      ),
     );
   }
 
@@ -110,7 +142,6 @@ class GastosScreen extends GetView<GastosController> {
         return ListTile(
           title: Text(g.descripcion),
           subtitle: Text('${g.categoria} · ${g.fecha}'),
-          // Por qué: tocar una fila abre el mismo formulario, ya relleno.
           onTap: () => Get.to(() => GastoFormScreen(gasto: g)),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
